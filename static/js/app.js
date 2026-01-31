@@ -87,6 +87,18 @@ const App = {
             this._updateDateLabel();
             this.loadConversations();
         });
+
+        document.getElementById("prev-day-btn").addEventListener("click", () => this._navigateDay(-1));
+        document.getElementById("next-day-btn").addEventListener("click", () => this._navigateDay(1));
+    },
+
+    _navigateDay(offset) {
+        const d = new Date(new Date().getFullYear(), this.state.month - 1, this.state.day + offset);
+        this.state.month = d.getMonth() + 1;
+        this.state.day = d.getDate();
+        document.getElementById("date-picker").value = this._toDateStr(d);
+        this._updateDateLabel();
+        this.loadConversations();
     },
 
     _setupSearch() {
