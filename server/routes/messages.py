@@ -66,7 +66,7 @@ def serve_attachment(attachment_id: int):
         raise HTTPException(status_code=404, detail="Attachment not found")
 
     # HEIC → JPEG conversion
-    if mime_type and "heic" in mime_type.lower() or path.lower().endswith(".heic"):
+    if (mime_type and "heic" in mime_type.lower()) or path.lower().endswith(".heic"):
         converted = _convert_heic(path, attachment_id)
         if converted and os.path.exists(converted):
             return FileResponse(converted, media_type="image/jpeg")

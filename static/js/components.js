@@ -147,12 +147,14 @@ const Components = {
             for (const att of msg.attachments) {
                 const url = att.url;
                 const mime = att.mime_type || "";
-                if (mime.startsWith("image/")) {
+                if (mime === "image/gif") {
+                    content += `<img src="${url}" alt="${this._esc(att.filename)}">`;
+                } else if (mime.startsWith("image/")) {
                     content += `<img src="${url}" alt="${this._esc(att.filename)}" loading="lazy">`;
                 } else if (mime.startsWith("video/")) {
                     content += `<video src="${url}" controls preload="metadata" playsinline></video>`;
-                } else if (mime === "image/gif") {
-                    content += `<img src="${url}" alt="${this._esc(att.filename)}">`;
+                } else if (mime.startsWith("audio/")) {
+                    content += `<audio src="${url}" controls preload="metadata"></audio>`;
                 } else {
                     content += `<a class="attachment-link" href="${url}" target="_blank">📎 ${this._esc(att.filename)}</a>`;
                 }

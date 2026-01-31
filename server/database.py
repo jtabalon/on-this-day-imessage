@@ -1,5 +1,6 @@
 """Read-only SQLite access to the iMessage chat.db."""
 
+import mimetypes
 import os
 import sqlite3
 from datetime import datetime, timezone
@@ -297,10 +298,11 @@ def _get_attachments_for_message(conn: sqlite3.Connection, message_id: int) -> l
     attachments = []
     for row in rows:
         filename = row["transfer_name"] or row["filename"] or "attachment"
+        mime_type = row["mime_type"] or mimetypes.guess_type(filename)[0]
         attachments.append({
             "id": row["attachment_id"],
             "filename": filename,
-            "mime_type": row["mime_type"],
+            "mime_type": mime_type,
             "url": f"/api/attachments/{row['attachment_id']}",
         })
     return attachments
@@ -320,6 +322,7 @@ def get_attachment_path(attachment_id: int) -> tuple[str | None, str | None]:
         # Decode URL-encoded characters in path (e.g. %20 → space)
         from urllib.parse import unquote
         path = unquote(path)
-        return path, row["mime_type"]
+        mime_type = row["mime_type"] or mimetypes.guess_type(row["filename"])[0]
+        return path, mime_type
     finally:
         conn.close()
