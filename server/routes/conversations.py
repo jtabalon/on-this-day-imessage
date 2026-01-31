@@ -1,6 +1,7 @@
 """GET /api/conversations — list conversations with messages on a given day."""
 
 import json
+import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Query
@@ -8,6 +9,8 @@ from fastapi.responses import Response
 
 from server.contacts import resolve_conversation_name, resolve_name
 from server.database import get_conversations_on_day
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -34,11 +37,21 @@ def list_conversations(
 
     # Resolve contact names and participant lists
     for conv in conversations:
-        conv["display_name"] = resolve_conversation_name(
-            conv["display_name"],
-            conv["handles"],
-            conv["is_group"],
-        )
-        conv["participants"] = [resolve_name(h) for h in conv["handles"]]
+        try:
+            conv["display_name"] = resolve_conversation_name(
+                conv["display_name"],
+                conv["handles"],
+                conv["is_group"],
+            )
+        except Exception:
+            logger.debug("Failed to resolve conversation name for chat %s", conv.get("chat_id"), exc_info=True)
+        participants = []
+        for h in conv["handles"]:
+            try:
+                participants.append(resolve_name(h))
+            except Exception:
+                logger.debug("Failed to resolve contact name for handle %r", h, exc_info=True)
+                participants.append(h)
+        conv["participants"] = participants
 
     return _safe_json_response({"month": month, "day": day, "conversations": conversations})

@@ -3,29 +3,19 @@
  */
 const Components = {
     showConversationError(errorMessage) {
-        const list = document.getElementById("conversation-list");
-        const p = document.createElement("p");
-        p.textContent = errorMessage;
-        p.style.marginTop = "8px";
-        p.style.fontSize = "12px";
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "error-state";
-
-        const mainP = document.createElement("p");
-        mainP.textContent = "Could not load conversations. Make sure Full Disk Access is granted to your terminal.";
-
-        wrapper.appendChild(mainP);
-        wrapper.appendChild(p);
-        list.innerHTML = "";
-        list.appendChild(wrapper);
+        document.getElementById("conversation-list").innerHTML = `
+            <div class="error-state">
+                <p>Could not load conversations. Make sure Full Disk Access is granted to your terminal.</p>
+                <p style="margin-top: 8px; font-size: 12px;">${this._esc(errorMessage)}</p>
+            </div>
+        `;
     },
 
     renderConversationList(conversations, activeId, onClick, searchQuery) {
         const list = document.getElementById("conversation-list");
 
         if (conversations.length === 0) {
-            const icon = searchQuery ? "\uD83D\uDD0D" : "\uD83D\uDCED";
+            const icon = searchQuery ? "🔍" : "📭";
             const msg = searchQuery
                 ? `No conversations matching "${this._esc(searchQuery)}"`
                 : "No conversations found for this day";

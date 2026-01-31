@@ -31,7 +31,7 @@ const App = {
 
         try {
             const data = await API.getConversations(this.state.month, this.state.day);
-            this.state.conversations = data.conversations;
+            this.state.conversations = data.conversations || [];
             this._filterAndRenderConversations();
         } catch (err) {
             Components.showConversationError(err.message);
@@ -41,8 +41,11 @@ const App = {
     async selectConversation(chatId) {
         this.state.activeChatId = chatId;
 
-        // Update sidebar active state
-        this._filterAndRenderConversations();
+        // Toggle active class without full re-render to preserve scroll position
+        const list = document.getElementById("conversation-list");
+        list.querySelectorAll(".conversation-item").forEach((el) => {
+            el.classList.toggle("active", parseInt(el.dataset.chatId, 10) === chatId);
+        });
 
         // Show message area on mobile
         document.getElementById("message-area").classList.add("visible");
@@ -96,15 +99,12 @@ const App = {
 
     _filterAndRenderConversations() {
         const q = this.state.searchQuery.toLowerCase().trim();
-        let filtered = this.state.conversations;
-
-        if (q) {
-            filtered = filtered.filter((conv) => {
-                if (conv.display_name && conv.display_name.toLowerCase().includes(q)) return true;
-                if (conv.participants && conv.participants.some((p) => p.toLowerCase().includes(q))) return true;
-                return false;
-            });
-        }
+        const filtered = q
+            ? this.state.conversations.filter((conv) =>
+                  (conv.display_name || "").toLowerCase().includes(q) ||
+                  (conv.participants || []).some((p) => (p || "").toLowerCase().includes(q))
+              )
+            : this.state.conversations;
 
         Components.renderConversationList(
             filtered,
