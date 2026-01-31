@@ -93,7 +93,7 @@ const App = {
     },
 
     _navigateDay(offset) {
-        const d = new Date(2024, this.state.month - 1, this.state.day + offset);
+        const d = new Date(new Date().getFullYear(), this.state.month - 1, this.state.day + offset);
         this.state.month = d.getMonth() + 1;
         this.state.day = d.getDate();
         document.getElementById("date-picker").value = this._toDateStr(d);
