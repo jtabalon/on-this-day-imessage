@@ -7,6 +7,7 @@ const App = {
         day: null,
         activeChatId: null,
         conversations: [],
+        searchQuery: "",
     },
 
     init() {
@@ -15,6 +16,7 @@ const App = {
         this.state.day = now.getDate();
 
         this._setupDatePicker();
+        this._setupSearch();
         this._setupBackButton();
         this._updateDateLabel();
         this.loadConversations();
@@ -24,22 +26,15 @@ const App = {
         Components.showSidebarLoading();
         Components.showEmptyState();
         this.state.activeChatId = null;
+        this.state.searchQuery = "";
+        document.getElementById("search-input").value = "";
 
         try {
             const data = await API.getConversations(this.state.month, this.state.day);
             this.state.conversations = data.conversations;
-            Components.renderConversationList(
-                data.conversations,
-                null,
-                (chatId) => this.selectConversation(chatId)
-            );
+            this._filterAndRenderConversations();
         } catch (err) {
-            document.getElementById("conversation-list").innerHTML = `
-                <div class="error-state">
-                    <p>Could not load conversations. Make sure Full Disk Access is granted to your terminal.</p>
-                    <p style="margin-top: 8px; font-size: 12px;">${err.message}</p>
-                </div>
-            `;
+            Components.showConversationError(err.message);
         }
     },
 
@@ -47,11 +42,7 @@ const App = {
         this.state.activeChatId = chatId;
 
         // Update sidebar active state
-        Components.renderConversationList(
-            this.state.conversations,
-            chatId,
-            (id) => this.selectConversation(id)
-        );
+        this._filterAndRenderConversations();
 
         // Show message area on mobile
         document.getElementById("message-area").classList.add("visible");
@@ -93,6 +84,34 @@ const App = {
             this._updateDateLabel();
             this.loadConversations();
         });
+    },
+
+    _setupSearch() {
+        const input = document.getElementById("search-input");
+        input.addEventListener("input", () => {
+            this.state.searchQuery = input.value;
+            this._filterAndRenderConversations();
+        });
+    },
+
+    _filterAndRenderConversations() {
+        const q = this.state.searchQuery.toLowerCase().trim();
+        let filtered = this.state.conversations;
+
+        if (q) {
+            filtered = filtered.filter((conv) => {
+                if (conv.display_name && conv.display_name.toLowerCase().includes(q)) return true;
+                if (conv.participants && conv.participants.some((p) => p.toLowerCase().includes(q))) return true;
+                return false;
+            });
+        }
+
+        Components.renderConversationList(
+            filtered,
+            this.state.activeChatId,
+            (id) => this.selectConversation(id),
+            this.state.searchQuery
+        );
     },
 
     _setupBackButton() {

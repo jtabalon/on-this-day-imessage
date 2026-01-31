@@ -32,12 +32,13 @@ def list_conversations(
 
     conversations = get_conversations_on_day(month, day)
 
-    # Resolve contact names
+    # Resolve contact names and participant lists
     for conv in conversations:
         conv["display_name"] = resolve_conversation_name(
             conv["display_name"],
             conv["handles"],
             conv["is_group"],
         )
+        conv["participants"] = [resolve_name(h) for h in conv["handles"]]
 
     return _safe_json_response({"month": month, "day": day, "conversations": conversations})

@@ -99,6 +99,23 @@ html, body {
     font-weight: 500;
 }
 
+#search-input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--font-stack);
+    font-size: 14px;
+    background: white;
+    color: var(--text-primary);
+    outline: none;
+}
+#search-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.15);
+}
+
 #conversation-list {
     flex: 1;
     overflow-y: auto;

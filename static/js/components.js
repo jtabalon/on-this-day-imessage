@@ -2,17 +2,37 @@
  * DOM rendering components for On This Day iMessage.
  */
 const Components = {
-    /**
-     * Render the conversation list in the sidebar.
-     */
-    renderConversationList(conversations, activeId, onClick) {
+    showConversationError(errorMessage) {
+        const list = document.getElementById("conversation-list");
+        const p = document.createElement("p");
+        p.textContent = errorMessage;
+        p.style.marginTop = "8px";
+        p.style.fontSize = "12px";
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "error-state";
+
+        const mainP = document.createElement("p");
+        mainP.textContent = "Could not load conversations. Make sure Full Disk Access is granted to your terminal.";
+
+        wrapper.appendChild(mainP);
+        wrapper.appendChild(p);
+        list.innerHTML = "";
+        list.appendChild(wrapper);
+    },
+
+    renderConversationList(conversations, activeId, onClick, searchQuery) {
         const list = document.getElementById("conversation-list");
 
         if (conversations.length === 0) {
+            const icon = searchQuery ? "\uD83D\uDD0D" : "\uD83D\uDCED";
+            const msg = searchQuery
+                ? `No conversations matching "${this._esc(searchQuery)}"`
+                : "No conversations found for this day";
             list.innerHTML = `
                 <div class="error-state" style="color: var(--text-secondary); padding: 60px 20px;">
-                    <div class="empty-icon">📭</div>
-                    <p>No conversations found for this day</p>
+                    <div class="empty-icon">${icon}</div>
+                    <p>${msg}</p>
                 </div>
             `;
             return;
