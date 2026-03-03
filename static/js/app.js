@@ -15,6 +15,7 @@ const App = {
         this.state.month = now.getMonth() + 1;
         this.state.day = now.getDate();
 
+        this._setupThemeToggle();
         this._setupDatePicker();
         this._setupSearch();
         this._setupBackButton();
@@ -60,6 +61,41 @@ const App = {
                 `Could not load messages: ${err.message}`
             );
         }
+    },
+
+    _setupThemeToggle() {
+        const toggle = document.getElementById("theme-toggle");
+        const icon = document.getElementById("theme-icon");
+        const saved = localStorage.getItem("theme");
+
+        if (saved) {
+            document.documentElement.setAttribute("data-theme", saved);
+        }
+        this._updateThemeIcon(icon);
+
+        toggle.addEventListener("click", () => {
+            const current = document.documentElement.getAttribute("data-theme");
+            let next;
+            if (current === "dark") {
+                next = "light";
+            } else if (current === "light") {
+                next = "dark";
+            } else {
+                // No manual override — toggle based on system preference
+                const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                next = prefersDark ? "light" : "dark";
+            }
+            document.documentElement.setAttribute("data-theme", next);
+            localStorage.setItem("theme", next);
+            this._updateThemeIcon(icon);
+        });
+    },
+
+    _updateThemeIcon(icon) {
+        const theme = document.documentElement.getAttribute("data-theme");
+        const isDark = theme === "dark" ||
+            (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        icon.innerHTML = isDark ? "&#9788;" : "&#9790;";
     },
 
     _setupDatePicker() {
